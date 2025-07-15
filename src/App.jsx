@@ -34,15 +34,9 @@ function App() {
   }, [])
 
   const handleLogin = (userData) => {
-    // Add admin flag for admin@demo.com
-    if (userData.email === 'admin@demo.com') {
-      userData.isAdmin = true
-      userData.name = 'Admin User'
-    }
-    
     setUser(userData)
     setIsAuthenticated(true)
-    localStorage.setItem('mikecare_user', JSON.stringify(userData))
+    localStorage.setItem("mikecare_user", JSON.stringify(userData))
   }
 
   const handleOnboardingComplete = () => {

@@ -12,19 +12,26 @@ const Login = ({ onLogin }) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsLoading(true)
-    
-    // Simulate login process
-    setTimeout(() => {
-      const userData = {
-        id: 1,
-        name: email.split('@')[0] || 'User',
-        email: email,
-        isAdmin: email.includes('admin')
+        try {
+      const response = await fetch("https://ogh5izce18yj.manus.space/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        onLogin(data.user);
+      } else {
+        alert(data.message || "Login failed");
       }
-      onLogin(userData)
-      setIsLoading(false)
-    }, 1000)
-  }
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("An error occurred during login.");
+    } finally {
+      setIsLoading(false);
+    }}
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -101,11 +108,7 @@ const Login = ({ onLogin }) => {
               </Button>
             </form>
             
-            <div className="mt-4 text-center">
-              <p className="text-sm text-muted-foreground">
-                Demo accounts: user@demo.com or admin@demo.com
-              </p>
-            </div>
+
           </CardContent>
         </Card>
 

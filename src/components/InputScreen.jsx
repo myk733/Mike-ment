@@ -3,16 +3,16 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
-import { 
-  ArrowLeft, 
-  Mic, 
-  MicOff, 
-  Heart, 
-  Home, 
-  Briefcase, 
-  DollarSign, 
-  TrendingUp, 
-  Users, 
+import {
+  ArrowLeft,
+  Mic,
+  MicOff,
+  Heart,
+  Home,
+  Briefcase,
+  DollarSign,
+  TrendingUp,
+  Users,
   Activity,
   Send,
   Loader2
@@ -95,18 +95,27 @@ const InputScreen = () => {
 
     setIsAnalyzing(true)
     
-    // Simulate analysis and solution generation
-    setTimeout(() => {
-      // Store the input and category for the solutions page
-      localStorage.setItem('currentInput', JSON.stringify({
-        text: inputText,
-        category: selectedCategory,
-        timestamp: new Date().toISOString()
-      }))
-      
-      setIsAnalyzing(false)
-      navigate('/solutions')
-    }, 2000)
+    try {
+      const response = await fetch("https://ogh5izce18yj.manus.space/api/analyze", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text: inputText, category: selectedCategory }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.setItem("currentSolution", JSON.stringify(data.solution));
+        navigate("/solutions");
+      } else {
+        alert(data.message || "Failed to get solution");
+      }
+    } catch (error) {
+      console.error("Solution analysis error:", error);
+      alert("An error occurred during analysis.");
+    } finally {
+      setIsAnalyzing(false);
+    }
   }
 
   return (
@@ -238,4 +247,5 @@ const InputScreen = () => {
 }
 
 export default InputScreen
+
 

@@ -1,14 +1,14 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { 
-  Home, 
-  BookOpen, 
-  Lightbulb, 
-  Users, 
-  User, 
+import {
+  Home,
+  BookOpen,
+  Lightbulb,
+  Users,
+  User,
   Settings,
   Mic,
   PenTool,
@@ -20,7 +20,24 @@ import {
 
 const Dashboard = ({ user }) => {
   const [selectedMood, setSelectedMood] = useState(null)
-  const [showAdminButton, setShowAdminButton] = useState(false)
+  const [recentSolutions, setRecentSolutions] = useState([])
+
+  useEffect(() => {
+    const fetchRecentSolutions = async () => {
+      try {
+        const response = await fetch('https://ogh5izce18yj.manus.space/api/solutions')
+        if (response.ok) {
+          const data = await response.json()
+          setRecentSolutions(data.solutions)
+        } else {
+          console.error('Failed to fetch recent solutions')
+        }
+      } catch (error) {
+        console.error('Error fetching recent solutions:', error)
+      }
+    }
+    fetchRecentSolutions()
+  }, [])
 
   const moodOptions = [
     { icon: Frown, label: 'Struggling', value: 1, color: 'text-red-400' },
@@ -30,40 +47,20 @@ const Dashboard = ({ user }) => {
     { icon: Smile, label: 'Great', value: 5, color: 'text-green-500' }
   ]
 
-  const recentSolutions = [
-    {
-      title: 'Managing Work Stress',
-      description: 'Breathing exercises and time management techniques',
-      category: 'Work & Career',
-      timeAgo: '2 hours ago'
-    },
-    {
-      title: 'Building Confidence',
-      description: 'Daily affirmations and goal-setting strategies',
-      category: 'Personal Growth',
-      timeAgo: '1 day ago'
-    }
-  ]
-
-  const handleLogoClick = () => {
-    setShowAdminButton(!showAdminButton)
-  }
-
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-card border-b border-border p-4">
         <div className="flex items-center justify-between">
-          <div 
-            className="flex items-center space-x-2 cursor-pointer"
-            onClick={handleLogoClick}
+          <div
+            className="flex items-center space-x-2"
           >
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-sm">MC</span>
             </div>
             <h1 className="text-lg font-semibold">Mike Care Builds</h1>
           </div>
-          {showAdminButton && user?.isAdmin && (
+          {user?.isAdmin && (
             <Link to="/admin">
               <Button variant="outline" size="sm">
                 <Settings className="w-4 h-4 mr-1" />
@@ -142,21 +139,25 @@ const Dashboard = ({ user }) => {
             <CardDescription>Your latest wellness resources</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {recentSolutions.map((solution, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                <div className="flex-1">
-                  <h4 className="font-medium">{solution.title}</h4>
-                  <p className="text-sm text-muted-foreground">{solution.description}</p>
-                  <div className="flex items-center space-x-2 mt-1">
-                    <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded">
-                      {solution.category}
-                    </span>
-                    <span className="text-xs text-muted-foreground">{solution.timeAgo}</span>
+            {recentSolutions.length > 0 ? (
+              recentSolutions.map((solution, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                  <div className="flex-1">
+                    <h4 className="font-medium">{solution.title}</h4>
+                    <p className="text-sm text-muted-foreground">{solution.description}</p>
+                    <div className="flex items-center space-x-2 mt-1">
+                      <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded">
+                        {solution.category}
+                      </span>
+                      <span className="text-xs text-muted-foreground">{solution.timeAgo}</span>
+                    </div>
                   </div>
+                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
                 </div>
-                <ChevronRight className="w-5 h-5 text-muted-foreground" />
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-muted-foreground text-center">No recent solutions. Start your journey by sharing your thoughts!</p>
+            )}
           </CardContent>
         </Card>
 
@@ -221,4 +222,3 @@ const Dashboard = ({ user }) => {
 }
 
 export default Dashboard
-
