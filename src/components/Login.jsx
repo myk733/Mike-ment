@@ -7,31 +7,38 @@ import { Heart, Shield, Users } from 'lucide-react'
 const Login = ({ onLogin }) => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [name, setName] = useState('') // New state for name
   const [isLoading, setIsLoading] = useState(false)
+  const [isLoginView, setIsLoginView] = useState(true) // New state to toggle between login/signup
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsLoading(true)
-        try {
-      const response = await fetch("https://ogh5izce18yj.manus.space/api/login", {
+
+    const endpoint = isLoginView ? "/api/login" : "/api/register"
+    const body = isLoginView ? { email, password } : { name, email, password }
+
+    try {
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(body),
       });
       const data = await response.json();
       if (response.ok) {
         onLogin(data.user);
       } else {
-        alert(data.message || "Login failed");
+        alert(data.message || (isLoginView ? "Login failed" : "Registration failed"));
       }
     } catch (error) {
-      console.error("Login error:", error);
-      alert("An error occurred during login.");
+      console.error(isLoginView ? "Login error:" : "Registration error:", error);
+      alert("An error occurred during " + (isLoginView ? "login." : "registration."));
     } finally {
       setIsLoading(false);
-    }}
+    }
+  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -63,16 +70,31 @@ const Login = ({ onLogin }) => {
           </div>
         </div>
 
-        {/* Login Form */}
+        {/* Login/Signup Form */}
         <Card>
           <CardHeader>
-            <CardTitle>Welcome Back</CardTitle>
+            <CardTitle>{isLoginView ? "Welcome Back" : "Join Mike Care Builds"}</CardTitle>
             <CardDescription>
-              Sign in to continue your wellness journey
+              {isLoginView ? "Sign in to continue your wellness journey" : "Create your account to start your wellness journey"}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {!isLoginView && (
+                <div className="space-y-2">
+                  <label htmlFor="name" className="text-sm font-medium">
+                    Name
+                  </label>
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="Enter your name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
               <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium">
                   Email
@@ -104,10 +126,25 @@ const Login = ({ onLogin }) => {
                 className="w-full" 
                 disabled={isLoading}
               >
-                {isLoading ? 'Signing in...' : 'Sign In'}
+                {isLoading ? (isLoginView ? 'Signing in...' : 'Registering...') : (isLoginView ? 'Sign In' : 'Sign Up')}
               </Button>
             </form>
             
+            <div className="mt-4 text-center text-sm">
+              {isLoginView ? (
+                <>Don't have an account? {" "}
+                  <Button variant="link" onClick={() => setIsLoginView(false)} className="p-0 h-auto">
+                    Sign Up
+                  </Button>
+                </>
+              ) : (
+                <>Already have an account? {" "}
+                  <Button variant="link" onClick={() => setIsLoginView(true)} className="p-0 h-auto">
+                    Sign In
+                  </Button>
+                </>
+              )}
+            </div>
 
           </CardContent>
         </Card>
@@ -122,4 +159,5 @@ const Login = ({ onLogin }) => {
 }
 
 export default Login
+
 

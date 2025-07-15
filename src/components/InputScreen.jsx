@@ -96,7 +96,7 @@ const InputScreen = () => {
     setIsAnalyzing(true)
     
     try {
-      const response = await fetch("https://ogh5izce18yj.manus.space/api/analyze", {
+      const response = await fetch("/api/analyze", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
